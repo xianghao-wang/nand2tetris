@@ -59,5 +59,11 @@ CHIP ALU {
 
     // negation of result
     Not16(in=res, out=notres);
-    Mux16(a=res, b=notres, sel=no, out=out);
+    Mux16(a=res, b=notres, sel=no, out=out, out=final, out[15]=ng, out[0..7]=prefinal, out[0..7]=postfinal);
+
+    // check zero
+    Or8Way(in=prefinal, out=or1);
+    Or8Way(in=postfinal, out=or2);
+    Or(a=or1, b=or2, out=nzr);
+    Not(in=nzr, out=zr);
 }
