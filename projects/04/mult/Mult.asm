@@ -9,4 +9,36 @@
 // This program only needs to handle arguments that satisfy
 // R0 >= 0, R1 >= 0, and R0*R1 < 32768.
 
-// Put your code here.
+
+// initialization
+@R2
+M=0
+@i
+M=0
+
+(LOOP)
+    // if i == Mem[1], jump to END
+    @i
+    D=M
+    @R1
+    D=M-D
+    @END
+    D;JEQ
+
+    // Mem[2] += Mem[0]
+    @R0
+    D=M
+    @R2
+    M=M+D
+
+    // i ++
+    @i
+    M=M+1 
+
+    // back to loop
+    @LOOP
+    0;JMP
+
+(END)
+    @END
+    0;JMP
