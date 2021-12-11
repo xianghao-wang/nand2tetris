@@ -39,5 +39,23 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+
+    // C instrcution
+    // a: instruction[3]
+    // c1-c5: instruction[4..9]
+    // d1-d3: instruction[10..12]
+    // j1-j3: instruction[13..15]
+    Mux16(a=outA, b=outM, sel=instrcution[3], out=op);
+    ALU(x=outD, y=op,
+        zx=instruction[4], nx=instruction[5], zy=instruction[6], ny=instruction[7], f=instruction[8], no=instruction[9],
+        out=res, zr=zr, ng=ng);
+    And(a=j1, b=ng, out=less);
+    And(a=j2, b=zr, out=equal);
+    Not(in=ng, out=ps);
+    And(a=j3, b=ps, out=greater);
+    Or(a=less, b=equal, out=or0);
+    Or(a=or0, b=greater, out=jmp);
+
+    // A instruction
+
 }
