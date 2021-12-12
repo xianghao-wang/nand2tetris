@@ -56,6 +56,7 @@ CHIP CPU {
     Or(a=less, b=equal, out=or0);
     Or(a=or0, b=greater, out=jmp);
 
-    // A instruction
+    // PC
+    PC(in=outA, load=jmp, inc=true, reset=reset, out=pc);
 
 }
