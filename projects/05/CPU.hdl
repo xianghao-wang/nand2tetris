@@ -39,24 +39,34 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
+    // A register
+    Mux16(a=instruction, b=res, sel=instruction[15], out=inA);
+    Not(in=instruction[15], out=opA); // A-instruction
+    Or(a=opA, b=instruction[5], out=loadA); // write to A register when it's A-instruction or C-instruction with destination A
+    ARegister(in=inA, load=loadA, out[0..14]=addressM, out=dataA);
 
-    // C instrcution
-    // a: instruction[3]
-    // c1-c5: instruction[4..9]
-    // d1-d3: instruction[10..12]
-    // j1-j3: instruction[13..15]
-    Mux16(a=outA, b=outM, sel=instrcution[3], out=op);
-    ALU(x=outD, y=op,
-        zx=instruction[4], nx=instruction[5], zy=instruction[6], ny=instruction[7], f=instruction[8], no=instruction[9],
-        out=res, zr=zr, ng=ng);
-    And(a=j1, b=ng, out=less);
-    And(a=j2, b=zr, out=equal);
-    Not(in=ng, out=ps);
-    And(a=j3, b=ps, out=greater);
-    Or(a=less, b=equal, out=or0);
-    Or(a=or0, b=greater, out=jmp);
+    // D register
+    And(a=instruction[15], b=instruction[4], out=loadD);
+    DRegister(in=res, load=loadD, out=dataD);
 
     // PC
-    PC(in=outA, load=jmp, inc=true, reset=reset, out=pc);
+    Or(a=ng, b=zr, out=nps); // not positive
+    Not(in=nps, out=ps); // positive
+    And(a=ng, b=instruction[2], out=less); // jump if less than 0
+    And(a=zr, b=instruction[1], out=equal); // jump if equal to 0
+    And(a=ps, b=instruction[0], out=greater); // jump if greater than 0
+    Or(a=less, b=equal, out=or0); // any jump condition meets
+    Or(a=or0, b=greater, out=or1);
+    And(a=instruction[15], b=or1, out=loadPC); // jump when it is C-instruction and jump conditions meets
+    PC(in=dataA, load=loadPC, inc=true, reset=reset, out[0..14]=pc);
+
+    // Computation
+    Mux16(a=dataA, b=inM, sel=instruction[12], out=operator); // choose the other operator to compute with D
+    ALU(x=dataD, y=operator,
+        zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6],
+        out=res, out=outM, zr=zr, ng=ng);
+
+    // M register
+    And(a=instruction[15], b=instruction[3], out=writeM); // write to M only when C instruction with destination M
 
 }
