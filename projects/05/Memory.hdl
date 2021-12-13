@@ -27,10 +27,20 @@ CHIP Memory {
     OUT out[16];
 
     PARTS:
-    DMux4Way(in=load, sel=address[13..14], a=load0, b=load1, c=load2, d=none);
-    RAM8K(in=in, load=load0, address=address[0..12], out=out0);
-    RAM8K(in=in, load=load1, address=address[0..12], out=out1);
-    Screen(in=in, load=load2, address=address[0..12], out=out2);
-    Keyboard(out=out3);
-    Mux4Way16(a=out0, b=out1, c=out2, d=out3, sel=address[13..14], out=out);
+    // use RAM8K
+    // DMux4Way(in=load, sel=address[13..14], a=load0, b=load1, c=load2, d=none);
+    // RAM8K(in=in, load=load0, address=address[0..12], out=out0);
+    // RAM8K(in=in, load=load1, address=address[0..12], out=out1);
+    // Screen(in=in, load=load2, address=address[0..12], out=out2);
+    // Keyboard(out=out3);
+    // Mux4Way16(a=out0, b=out1, c=out2, d=out3, sel=address[13..14], out=out);
+
+    // use RAM16K
+    DMux(in=load, sel=address[14], a=loadM, b=loadIO);
+    DMux(in=loadIO, sel=address[13], a=loadS, b=nothing);
+    RAM16K(in=in, load=loadM, address=address[0..13], out=outM);
+    Screen(in=in, load=loadS, address=address[0..12], out=outS);
+    Keyboard(out=outK);
+    Mux16(a=outS, b=outK, sel=address[13], out=outIO);
+    Mux16(a=outM, b=outIO, sel=address[14], out=out);
 }
