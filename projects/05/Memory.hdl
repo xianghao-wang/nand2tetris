@@ -36,11 +36,19 @@ CHIP Memory {
     // Mux4Way16(a=out0, b=out1, c=out2, d=out3, sel=address[13..14], out=out);
 
     // use RAM16K
-    DMux(in=load, sel=address[14], a=loadM, b=loadIO);
-    DMux(in=loadIO, sel=address[13], a=loadS, b=nothing);
+    // DMux(in=load, sel=address[14], a=loadM, b=loadIO);
+    // DMux(in=loadIO, sel=address[13], a=loadS, b=nothing);
+    // RAM16K(in=in, load=loadM, address=address[0..13], out=outM);
+    // Screen(in=in, load=loadS, address=address[0..12], out=outS);
+    // Keyboard(out=outK);
+    // Mux16(a=outS, b=outK, sel=address[13], out=outIO);
+    // Mux16(a=outM, b=outIO, sel=address[14], out=out);
+
+    // use 4 way Mux and DMux
+    DMux4Way(in=load, sel=address[13..14], a=loadM0, b=loadM1, c=loadS, d=nothing);
+    Or(a=loadM0, b=loadM1, out=loadM);
     RAM16K(in=in, load=loadM, address=address[0..13], out=outM);
     Screen(in=in, load=loadS, address=address[0..12], out=outS);
     Keyboard(out=outK);
-    Mux16(a=outS, b=outK, sel=address[13], out=outIO);
-    Mux16(a=outM, b=outIO, sel=address[14], out=out);
+    Mux4Way16(a=outM, b=outM, c=outS, d=outK, sel=address[13..14], out=out);
 }
